@@ -128,11 +128,16 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 			continue;
 		}
 
+		free_node(next);
+		free_node(root);
+
 		*failed = token->index;
 		return 1;
 	}
 
 	if (!is_expression(root) && stop && stopped) {
+		free_node(root);
+
 		*failed = tokens->elements[*index - 1].index;
 		return 1;
 	}
