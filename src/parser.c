@@ -11,30 +11,15 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 		*index += 1;
 
 		if (token->type == TT_IDENTIFIER) {
-			if (new_node(&next, token->index, NT_VARIABLE, token->value)) {
-				free_node(root);
-
-				*failed = token->index;
-				return 1;
-			}
+			next = new_node(token->index, NT_VARIABLE, token->value);
 		}
 
 		if (token->type == TT_INTEGER) {
-			if (new_node(&next, token->index, NT_INTEGER, token->value)) {
-				free_node(root);
-
-				*failed = token->index;
-				return 1;
-			}
+			next = new_node(token->index, NT_INTEGER, token->value);
 		}
 
 		if (token->type == TT_OPERATOR) {
-			if (new_node(&next, token->index, NT_OPERATOR, token->value)) {
-				free_node(root);
-
-				*failed = token->index;
-				return 1;
-			}
+			next = new_node(token->index, NT_OPERATOR, token->value);
 		}
 
 		if (token->type == TT_SEPARATOR) {
@@ -70,15 +55,7 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 					return 1;
 				}
 
-				Node *function = NULL;
-
-				if (new_node(&function, token->index, NT_FUNCTION, "abs")) {
-					free_node(next);
-					free_node(root);
-
-					*failed = token->index;
-					return 1;
-				}
+				Node *function = new_node(token->index, NT_FUNCTION, "abs");
 
 				append_node(next, function);
 				next = function;

@@ -32,7 +32,7 @@ int is_expression(Node *node);
 
 Node *last_operator(Node *node);
 
-int new_node(Node **node, size_t index, NodeType type, char *value);
+Node *new_node(size_t index, NodeType type, char *value);
 
 char *node_type(NodeType type);
 

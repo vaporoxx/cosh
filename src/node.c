@@ -1,4 +1,5 @@
 #include "node.h"
+#include "memory.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -70,17 +71,11 @@ Node *last_operator(Node *node) {
 	return node;
 }
 
-int new_node(Node **node, size_t index, NodeType type, char *value) {
-	Node *new = malloc(sizeof(Node));
+Node *new_node(size_t index, NodeType type, char *value) {
+	Node *node = xmalloc(sizeof(Node));
 
-	if (!new) {
-		return 1;
-	}
-
-	*new = (Node){0, index, NULL, NULL, type, value};
-	*node = new;
-
-	return 0;
+	*node = (Node){0, index, NULL, NULL, type, value};
+	return node;
 }
 
 char *node_type(NodeType type) {

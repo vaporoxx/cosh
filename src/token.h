@@ -27,7 +27,7 @@ struct Tokens {
 
 typedef struct Tokens Tokens;
 
-int add_token(Tokens *tokens, size_t index, TokenType type, char *input, size_t length);
+void add_token(Tokens *tokens, size_t index, TokenType type, char *input, size_t length);
 
 void free_tokens(Tokens *tokens);
 

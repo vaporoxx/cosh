@@ -1,6 +1,6 @@
 #include "cli.h"
+#include "memory.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 void error(char *location, char *input, size_t failed) {
 	if (input[failed]) {
@@ -10,32 +10,22 @@ void error(char *location, char *input, size_t failed) {
 	}
 }
 
-int get_input(char **input) {
-	char *line = calloc(1, 1);
+char *get_input(void) {
+	char *input = xmalloc(1);
 	size_t size = 1;
 
-	if (!line) {
-		return 1;
-	}
+	input[0] = 0;
 
 	while (1) {
 		int read = getchar();
 
 		if (read == EOF || read == '\n') {
-			*input = line;
-			return 0;
+			return input;
 		}
 
-		char *new = realloc(line, size + 1);
-
-		if (!new) {
-			free(line);
-			return 1;
-		}
-
-		line = new;
-		line[size - 1] = read;
-		line[size] = 0;
+		input = xrealloc(input, size + 1);
+		input[size - 1] = read;
+		input[size] = 0;
 
 		size += 1;
 	}

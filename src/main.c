@@ -12,12 +12,7 @@ int main(void) {
 		fputs("\n>>> ", stderr);
 		fflush(stderr);
 
-		char *input = NULL;
-
-		if (get_input(&input)) {
-			fputs("cosh: could not get input\n", stderr);
-			return 1;
-		}
+		char *input = get_input();
 
 		if (feof(stdin)) {
 			fputs("^D\n", stderr);
