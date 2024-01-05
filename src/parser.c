@@ -1,10 +1,11 @@
 #include "parser.h"
+#include <string.h>
 
 static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index, char stop) {
 	Node *root = NULL;
 	int stopped = 0;
 
-	while (tokens->elements[*index].type != TT_END) {
+	while (*index < tokens->size) {
 		Node *next = NULL;
 		Token *token = tokens->elements + *index;
 
@@ -122,7 +123,7 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 	if ((root && !is_expression(root)) || (stop && !stopped)) {
 		free_node(root);
 
-		*failed = tokens->elements[*index].index;
+		*failed = strlen(tokens->input);
 		return 1;
 	}
 

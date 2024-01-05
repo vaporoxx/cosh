@@ -3,7 +3,6 @@
 #include <stddef.h>
 
 enum TokenType {
-	TT_END,
 	TT_IDENTIFIER,
 	TT_INTEGER,
 	TT_OPERATOR,
@@ -22,13 +21,14 @@ typedef struct Token Token;
 
 struct Tokens {
 	Token *elements;
+	char *input;
 	size_t size;
 };
 
 typedef struct Tokens Tokens;
 
-void add_token(Tokens *tokens, size_t index, TokenType type, char *input, size_t length);
+void add_token(Tokens *tokens, size_t index, size_t length, TokenType type);
 
 void free_tokens(Tokens *tokens);
 
-Tokens new_tokens(void);
+Tokens new_tokens(char *input);

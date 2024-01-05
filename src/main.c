@@ -19,7 +19,7 @@ int main(void) {
 		} else {
 			size_t failed = 0;
 			Node *node = NULL;
-			Tokens tokens = new_tokens();
+			Tokens tokens = new_tokens(input);
 
 			if (lex(input, &tokens, &failed)) {
 				error("lexer", input, failed);

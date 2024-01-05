@@ -20,7 +20,7 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 				length += 1;
 			}
 
-			add_token(tokens, index, TT_IDENTIFIER, input, length);
+			add_token(tokens, index, length, TT_IDENTIFIER);
 
 			index += length;
 			continue;
@@ -33,21 +33,21 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 				length += 1;
 			}
 
-			add_token(tokens, index, TT_INTEGER, input, length);
+			add_token(tokens, index, length, TT_INTEGER);
 
 			index += length;
 			continue;
 		}
 
 		if (strchr("%*+-/^", value)) {
-			add_token(tokens, index, TT_OPERATOR, input, 1);
+			add_token(tokens, index, 1, TT_OPERATOR);
 
 			index += 1;
 			continue;
 		}
 
 		if (strchr("()|", value)) {
-			add_token(tokens, index, TT_SEPARATOR, input, 1);
+			add_token(tokens, index, 1, TT_SEPARATOR);
 
 			index += 1;
 			continue;
@@ -57,6 +57,5 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 		return 1;
 	}
 
-	add_token(tokens, index, TT_END, input, 0);
 	return 0;
 }
