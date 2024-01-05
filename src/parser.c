@@ -69,6 +69,14 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 				continue;
 			}
 
+			if (strchr("+-", next->value[0])) {
+				Node *zero = new_node(token->index, NT_INTEGER, "0");
+				append_node(zero, next);
+
+				root = next;
+				continue;
+			}
+
 			free_node(next);
 
 			*failed = token->index;
