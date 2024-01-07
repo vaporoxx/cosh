@@ -1,12 +1,7 @@
-#include "runner.h"
+#include "debug.h"
 #include <stdio.h>
 
-static int print_node(Node *node, Node *root, size_t *failed) {
-	if (!is_child(node, root)) {
-		*failed = node->index;
-		return 1;
-	}
-
+static void debug_node(Node *node, Node *root) {
 	Node *current = root;
 
 	while (current != node) {
@@ -41,22 +36,19 @@ static int print_node(Node *node, Node *root, size_t *failed) {
 		printf("%s (%s) (column %zu) \n", node_type(node->type), node->value, node->index + 1);
 	}
 
-	if (node->left && print_node(node->left, root, failed)) {
-		return 1;
+	if (node->left) {
+		debug_node(node->left, root);
 	}
 
-	if (node->right && print_node(node->right, root, failed)) {
-		return 1;
+	if (node->right) {
+		debug_node(node->right, root);
 	}
-
-	return 0;
 }
 
-int run(Node *node, size_t *failed) {
+void debug(Node *node) {
 	if (node) {
-		return print_node(node, node, failed);
+		debug_node(node, node);
+	} else {
+		puts("(empty)");
 	}
-
-	puts("(empty)");
-	return 0;
 }

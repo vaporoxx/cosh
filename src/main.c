@@ -1,7 +1,7 @@
 #include "cli.h"
+#include "debug.h"
 #include "lexer.h"
 #include "parser.h"
-#include "runner.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,8 +25,8 @@ int main(void) {
 				error("lexer", input, failed);
 			} else if (parse(&tokens, &node, &failed)) {
 				error("parser", input, failed);
-			} else if (run(node, &failed)) {
-				error("runner", input, failed);
+			} else {
+				debug(node);
 			}
 
 			free_node(node);
