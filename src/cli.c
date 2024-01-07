@@ -1,6 +1,12 @@
 #include "cli.h"
 #include "memory.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static int is_option(char *option, char *short_name, char *long_name) {
+	return !strcmp(option, short_name) || !strcmp(option, long_name);
+}
 
 void error(char *location, char *input, size_t failed) {
 	if (input[failed]) {
@@ -29,4 +35,46 @@ char *get_input(void) {
 
 		size += 1;
 	}
+}
+
+Args parse_args(int argc, char **argv) {
+	Args args = {0, 0, NULL};
+	int in_option = 0;
+
+	for (int i = 1; i < argc; i += 1) {
+		char *last = argv[i - 1];
+		char *next = argv[i];
+
+		if (in_option && is_option(last, "-i", "--input")) {
+			args.input = next;
+			in_option = 0;
+
+			continue;
+		}
+
+		if (is_option(next, "-d", "--debug")) {
+			args.debug = 1;
+			continue;
+		}
+
+		if (is_option(next, "-h", "--help")) {
+			args.help = 1;
+			continue;
+		}
+
+		if (is_option(next, "-i", "--input")) {
+			in_option = 1;
+			continue;
+		}
+
+		fprintf(stderr, "cosh: invalid argument '%s'\n", next);
+		exit(1);
+	}
+
+	if (in_option) {
+		fprintf(stderr, "cosh: missing argument to '%s'\n", argv[argc - 1]);
+		exit(1);
+	}
+
+	return args;
 }

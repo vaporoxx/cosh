@@ -4,4 +4,10 @@ An interactive math shell.
 
 ## Progress
 
-The runner has not been implemented yet. It currently shows the AST of the input instead.
+The runner has not been implemented yet. It currently prints `0` for every input.
+
+## Usage
+
+```
+cosh --help
+```
