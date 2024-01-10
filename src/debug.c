@@ -48,7 +48,5 @@ static void debug_node(Node *node, Node *root) {
 void debug(Node *node) {
 	if (node) {
 		debug_node(node, node);
-	} else {
-		puts("(empty)");
 	}
 }

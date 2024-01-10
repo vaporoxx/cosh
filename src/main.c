@@ -15,6 +15,10 @@ static int run_input(Args *args, char *input) {
 	if (lex(input, &tokens, &failed_index)) {
 		error_lexer(input, failed_index);
 
+		if (!args->input) {
+			fputc('\n', stderr);
+		}
+
 		free_tokens(&tokens);
 		return 1;
 	}
@@ -22,14 +26,22 @@ static int run_input(Args *args, char *input) {
 	if (parse(&tokens, &node, &failed_token)) {
 		error_parser(failed_token);
 
+		if (!args->input) {
+			fputc('\n', stderr);
+		}
+
 		free_tokens(&tokens);
 		return 1;
 	}
 
 	if (args->debug) {
 		debug(node);
-	} else {
+	} else if (node) {
 		puts("0");
+	}
+
+	if (!args->input && node) {
+		fputc('\n', stderr);
 	}
 
 	free_node(node);
@@ -55,10 +67,10 @@ int main(int argc, char **argv) {
 		return run_input(&args, args.input);
 	}
 
-	fputs("cosh: interactive math shell\n", stderr);
+	fputs("cosh: interactive math shell\n\n", stderr);
 
 	while (!feof(stdin)) {
-		fputs("\n>>> ", stderr);
+		fputs(">>> ", stderr);
 		fflush(stderr);
 
 		char *input = get_input();
