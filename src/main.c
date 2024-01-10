@@ -6,19 +6,21 @@
 #include <stdlib.h>
 
 static int run_input(Args *args, char *input) {
-	size_t failed = 0;
 	Node *node = NULL;
-	Tokens tokens = new_tokens(input);
+	Tokens tokens = new_tokens();
 
-	if (lex(input, &tokens, &failed)) {
-		error("lexer", input, failed);
+	size_t failed_index = 0;
+	Token *failed_token = NULL;
+
+	if (lex(input, &tokens, &failed_index)) {
+		error_lexer(input, failed_index);
 
 		free_tokens(&tokens);
 		return 1;
 	}
 
-	if (parse(&tokens, &node, &failed)) {
-		error("parser", input, failed);
+	if (parse(&tokens, &node, &failed_token)) {
+		error_parser(failed_token);
 
 		free_tokens(&tokens);
 		return 1;

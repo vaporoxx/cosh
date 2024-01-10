@@ -21,14 +21,13 @@ typedef struct Token Token;
 
 struct Tokens {
 	Token *elements;
-	char *input;
 	size_t size;
 };
 
 typedef struct Tokens Tokens;
 
-void add_token(Tokens *tokens, size_t index, size_t length, TokenType type);
+void add_token(Tokens *tokens, size_t index, char *input, size_t length, TokenType type);
 
 void free_tokens(Tokens *tokens);
 
-Tokens new_tokens(char *input);
+Tokens new_tokens(void);

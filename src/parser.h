@@ -3,4 +3,4 @@
 #include "node.h"
 #include "token.h"
 
-int parse(Tokens *tokens, Node **node, size_t *failed);
+int parse(Tokens *tokens, Node **node, Token **failed);

@@ -1,7 +1,7 @@
 #include "parser.h"
 #include <string.h>
 
-static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index, char stop) {
+static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index, char stop) {
 	Node *root = NULL;
 	int stopped = 0;
 
@@ -41,7 +41,7 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 
 				free_node(root);
 
-				*failed = token->index;
+				*failed = token;
 				return 1;
 			}
 
@@ -79,7 +79,7 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 
 			free_node(next);
 
-			*failed = token->index;
+			*failed = token;
 			return 1;
 		}
 
@@ -117,21 +117,21 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 		free_node(next);
 		free_node(root);
 
-		*failed = token->index;
+		*failed = token;
 		return 1;
 	}
 
 	if (!is_expression(root) && stop && stopped) {
 		free_node(root);
 
-		*failed = tokens->elements[*index - 1].index;
+		*failed = tokens->elements + *index - 1;
 		return 1;
 	}
 
 	if ((root && !is_expression(root)) || (stop && !stopped)) {
 		free_node(root);
 
-		*failed = strlen(tokens->input);
+		*failed = NULL;
 		return 1;
 	}
 
@@ -139,7 +139,7 @@ static int parse_part(Tokens *tokens, Node **node, size_t *failed, size_t *index
 	return 0;
 }
 
-int parse(Tokens *tokens, Node **node, size_t *failed) {
+int parse(Tokens *tokens, Node **node, Token **failed) {
 	size_t index = 0;
 	return parse_part(tokens, node, failed, &index, 0);
 }

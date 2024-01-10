@@ -8,11 +8,15 @@ static int is_option(char *option, char *short_name, char *long_name) {
 	return !strcmp(option, short_name) || !strcmp(option, long_name);
 }
 
-void error(char *location, char *input, size_t failed) {
-	if (input[failed]) {
-		fprintf(stderr, "cosh: %s error at '%c', column %zu\n", location, input[failed], failed + 1);
+void error_lexer(char *input, size_t index) {
+	fprintf(stderr, "cosh: lexer error at '%c', column %zu\n", input[index], index + 1);
+}
+
+void error_parser(Token *token) {
+	if (token) {
+		fprintf(stderr, "cosh: parser error at '%s', column %zu\n", token->value, token->index + 1);
 	} else {
-		fprintf(stderr, "cosh: %s error at end of input\n", location);
+		fputs("cosh: parser error at end of input\n", stderr);
 	}
 }
 

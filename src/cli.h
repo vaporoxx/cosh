@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include "token.h"
 
 struct Args {
 	int debug;
@@ -10,7 +10,9 @@ struct Args {
 
 typedef struct Args Args;
 
-void error(char *location, char *input, size_t failed);
+void error_lexer(char *input, size_t index);
+
+void error_parser(Token *token);
 
 char *get_input(void);
 
