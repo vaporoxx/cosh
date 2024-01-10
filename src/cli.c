@@ -20,6 +20,10 @@ void error_parser(Token *token) {
 	}
 }
 
+void error_runner(Node *node, char *message) {
+	fprintf(stderr, "cosh: runner error at '%s', column %zu: %s\n", node->value, node->index + 1, message);
+}
+
 char *get_input(void) {
 	char *input = xmalloc(1);
 	size_t size = 1;

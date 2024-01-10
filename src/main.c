@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "lexer.h"
 #include "parser.h"
+#include "runner.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -10,7 +11,9 @@ static int run_input(Args *args, char *input) {
 	Tokens tokens = new_tokens();
 
 	size_t failed_index = 0;
+	Node *failed_node = NULL;
 	Token *failed_token = NULL;
+	char *message = NULL;
 
 	if (lex(input, &tokens, &failed_index)) {
 		error_lexer(input, failed_index);
@@ -36,8 +39,17 @@ static int run_input(Args *args, char *input) {
 
 	if (args->debug) {
 		debug(node);
-	} else if (node) {
-		puts("0");
+	} else if (run(node, &failed_node, &message)) {
+		error_runner(failed_node, message);
+
+		if (!args->input) {
+			fputc('\n', stderr);
+		}
+
+		free_node(node);
+		free_tokens(&tokens);
+
+		return 1;
 	}
 
 	if (!args->input && node) {

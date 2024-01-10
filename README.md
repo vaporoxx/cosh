@@ -2,9 +2,9 @@
 
 An interactive math shell.
 
-## Progress
+## Dependencies
 
-The runner has not been implemented yet. It currently prints `0` for every input.
+This project requires `gmp` to be installed, for example with `apt install libgmp-dev`.
 
 ## Usage
 
