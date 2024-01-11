@@ -2,31 +2,31 @@
 #include <stdio.h>
 #include <string.h>
 
-static int resolve_function(Node *node, mpz_t result, Node **failed, char **message) {
-	mpz_t value;
-	mpz_init(value);
+static int resolve_function(Node *node, mpq_t result, Node **failed, char **message) {
+	mpq_t value;
+	mpq_init(value);
 
 	if (resolve(node->left, value, failed, message)) {
-		mpz_clear(value);
+		mpq_clear(value);
 		return 1;
 	}
 
 	if (!strcmp(node->value, "abs")) {
-		mpz_abs(result, value);
+		mpq_abs(result, value);
 
-		mpz_clear(value);
+		mpq_clear(value);
 		return 0;
 	}
 
 	*failed = node;
 	*message = "unknown function";
 
-	mpz_clear(value);
+	mpq_clear(value);
 	return 1;
 }
 
-static int resolve_integer(Node *node, mpz_t result, Node **failed, char **message) {
-	if (mpz_set_str(result, node->value, 10)) {
+static int resolve_integer(Node *node, mpq_t result, Node **failed, char **message) {
+	if (mpq_set_str(result, node->value, 10)) {
 		*failed = node;
 		*message = "invalid integer";
 
@@ -36,101 +36,130 @@ static int resolve_integer(Node *node, mpz_t result, Node **failed, char **messa
 	return 0;
 }
 
-static int resolve_operator(Node *node, mpz_t result, Node **failed, char **message) {
-	mpz_t left;
-	mpz_init(left);
+static int resolve_operator(Node *node, mpq_t result, Node **failed, char **message) {
+	mpq_t left;
+	mpq_init(left);
 
 	if (resolve(node->left, left, failed, message)) {
-		mpz_clear(left);
+		mpq_clear(left);
 		return 1;
 	}
 
-	mpz_t right;
-	mpz_init(right);
+	mpq_t right;
+	mpq_init(right);
 
 	if (resolve(node->right, right, failed, message)) {
-		mpz_clears(left, right, NULL);
+		mpq_clears(left, right, NULL);
 		return 1;
 	}
 
 	char value = node->value[0];
 
 	if (value == '%') {
-		if (!mpz_sgn(right)) {
+		if (mpz_cmp_ui(mpq_denref(left), 1) || mpz_cmp_ui(mpq_denref(right), 1)) {
 			*failed = node;
-			*message = "division by zero";
+			*message = "modulo operands must be integers";
 
-			mpz_clears(left, right, NULL);
+			mpq_clears(left, right, NULL);
 			return 1;
 		}
 
-		mpz_mod(result, left, right);
+		if (!mpq_sgn(right)) {
+			*failed = node;
+			*message = "division by zero";
 
-		mpz_clears(left, right, NULL);
+			mpq_clears(left, right, NULL);
+			return 1;
+		}
+
+		mpz_mod(mpq_numref(result), mpq_numref(left), mpq_numref(right));
+
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	if (value == '*') {
-		mpz_mul(result, left, right);
+		mpq_mul(result, left, right);
 
-		mpz_clears(left, right, NULL);
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	if (value == '+') {
-		mpz_add(result, left, right);
+		mpq_add(result, left, right);
 
-		mpz_clears(left, right, NULL);
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	if (value == '-') {
-		mpz_sub(result, left, right);
+		mpq_sub(result, left, right);
 
-		mpz_clears(left, right, NULL);
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	if (value == '/') {
-		if (!mpz_sgn(right)) {
+		if (!mpq_sgn(right)) {
 			*failed = node;
 			*message = "division by zero";
 
-			mpz_clears(left, right, NULL);
+			mpq_clears(left, right, NULL);
 			return 1;
 		}
 
-		mpz_div(result, left, right);
+		mpq_div(result, left, right);
 
-		mpz_clears(left, right, NULL);
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	if (value == '^') {
-		if (!mpz_fits_ulong_p(right)) {
+		if (mpz_cmp_ui(mpq_denref(right), 1)) {
 			*failed = node;
-			*message = "invalid exponent";
+			*message = "exponent must be an integer";
 
-			mpz_clears(left, right, NULL);
+			mpq_clears(left, right, NULL);
 			return 1;
 		}
 
-		mpz_pow_ui(result, left, mpz_get_ui(right));
+		if (!mpz_fits_sshort_p(mpq_numref(right))) {
+			*failed = node;
+			*message = "exponent out of range";
 
-		mpz_clears(left, right, NULL);
+			mpq_clears(left, right, NULL);
+			return 1;
+		}
+
+		if (!mpq_sgn(left) && mpq_sgn(right) == -1) {
+			*failed = node;
+			*message = "negative exponent requires non-zero base";
+
+			mpq_clears(left, right, NULL);
+			return 1;
+		}
+
+		mpz_pow_ui(mpq_numref(result), mpq_numref(left), mpz_get_ui(mpq_numref(right)));
+		mpz_pow_ui(mpq_denref(result), mpq_denref(left), mpz_get_ui(mpq_numref(right)));
+
+		if (mpq_sgn(right) == -1) {
+			mpq_inv(result, result);
+		}
+
+		mpq_clears(left, right, NULL);
 		return 0;
 	}
 
 	*failed = node;
 	*message = "unknown operator";
 
-	mpz_clears(left, right, NULL);
+	mpq_clears(left, right, NULL);
 	return 1;
 }
 
-static int resolve_variable(Node *node, mpz_t result, Node **failed, char **message) {
+static int resolve_variable(Node *node, mpq_t result, Node **failed, char **message) {
 	if (!strcmp(node->value, "x")) {
-		mpz_set_ui(result, 5);
+		mpq_set_ui(result, 5, 1);
 		return 0;
 	}
 
@@ -140,7 +169,7 @@ static int resolve_variable(Node *node, mpz_t result, Node **failed, char **mess
 	return 1;
 }
 
-int resolve(Node *node, mpz_t result, Node **failed, char **message) {
+int resolve(Node *node, mpq_t result, Node **failed, char **message) {
 	switch (node->type) {
 		case NT_FUNCTION:
 			return resolve_function(node, result, failed, message);
@@ -163,17 +192,17 @@ int run(Node *node, Node **failed, char **message) {
 		return 0;
 	}
 
-	mpz_t value;
-	mpz_init(value);
+	mpq_t value;
+	mpq_init(value);
 
 	if (resolve(node, value, failed, message)) {
-		mpz_clear(value);
+		mpq_clear(value);
 		return 1;
 	}
 
-	mpz_out_str(stdout, 10, value);
+	mpq_out_str(stdout, 10, value);
 	putchar('\n');
 
-	mpz_clear(value);
+	mpq_clear(value);
 	return 0;
 }
