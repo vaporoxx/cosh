@@ -18,6 +18,35 @@ static int resolve_function(Node *node, mpq_t result, Node **failed, char **mess
 		return 0;
 	}
 
+	if (!strcmp(node->value, "inv")) {
+		if (!mpq_sgn(value)) {
+			*failed = node;
+			*message = "argument must be non-zero";
+
+			mpq_clear(value);
+			return 1;
+		}
+
+		mpq_inv(result, value);
+
+		mpq_clear(value);
+		return 0;
+	}
+
+	if (!strcmp(node->value, "neg")) {
+		mpq_neg(result, value);
+
+		mpq_clear(value);
+		return 0;
+	}
+
+	if (!strcmp(node->value, "sgn")) {
+		mpq_set_si(result, mpq_sgn(value), 1);
+
+		mpq_clear(value);
+		return 0;
+	}
+
 	*failed = node;
 	*message = "unknown function";
 
