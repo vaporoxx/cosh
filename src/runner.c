@@ -37,12 +37,11 @@ static int resolve_integer(Node *node, mpz_t result, Node **failed, char **messa
 }
 
 static int resolve_operator(Node *node, mpz_t result, Node **failed, char **message) {
-	char value = node->value[0];
+	mpz_t left;
+	mpz_init(left);
 
-	if (!strchr("%*+-/^", value)) {
-		*failed = node;
-		*message = "unknown operator";
-
+	if (resolve(node->left, left, failed, message)) {
+		mpz_clear(left);
 		return 1;
 	}
 
@@ -50,54 +49,83 @@ static int resolve_operator(Node *node, mpz_t result, Node **failed, char **mess
 	mpz_init(right);
 
 	if (resolve(node->right, right, failed, message)) {
-		mpz_clear(right);
+		mpz_clears(left, right, NULL);
 		return 1;
 	}
 
-	if ((value == '%' || value == '/') && !mpz_sgn(right)) {
-		*failed = node;
-		*message = "division by zero";
-
-		mpz_clear(right);
-		return 1;
-	}
-
-	if (value == '^' && !mpz_fits_ulong_p(right)) {
-		*failed = node;
-		*message = "invalid exponent";
-
-		mpz_clear(right);
-		return 1;
-	}
-
-	mpz_t left;
-	mpz_init(left);
-
-	if (resolve(node->left, left, failed, message)) {
-		mpz_clear(left);
-		mpz_clear(right);
-
-		return 1;
-	}
+	char value = node->value[0];
 
 	if (value == '%') {
+		if (!mpz_sgn(right)) {
+			*failed = node;
+			*message = "division by zero";
+
+			mpz_clears(left, right, NULL);
+			return 1;
+		}
+
 		mpz_mod(result, left, right);
-	} else if (value == '*') {
-		mpz_mul(result, left, right);
-	} else if (value == '+') {
-		mpz_add(result, left, right);
-	} else if (value == '-') {
-		mpz_sub(result, left, right);
-	} else if (value == '/') {
-		mpz_div(result, left, right);
-	} else if (value == '^') {
-		mpz_pow_ui(result, left, mpz_get_ui(right));
+
+		mpz_clears(left, right, NULL);
+		return 0;
 	}
 
-	mpz_clear(left);
-	mpz_clear(right);
+	if (value == '*') {
+		mpz_mul(result, left, right);
 
-	return 0;
+		mpz_clears(left, right, NULL);
+		return 0;
+	}
+
+	if (value == '+') {
+		mpz_add(result, left, right);
+
+		mpz_clears(left, right, NULL);
+		return 0;
+	}
+
+	if (value == '-') {
+		mpz_sub(result, left, right);
+
+		mpz_clears(left, right, NULL);
+		return 0;
+	}
+
+	if (value == '/') {
+		if (!mpz_sgn(right)) {
+			*failed = node;
+			*message = "division by zero";
+
+			mpz_clears(left, right, NULL);
+			return 1;
+		}
+
+		mpz_div(result, left, right);
+
+		mpz_clears(left, right, NULL);
+		return 0;
+	}
+
+	if (value == '^') {
+		if (!mpz_fits_ulong_p(right)) {
+			*failed = node;
+			*message = "invalid exponent";
+
+			mpz_clears(left, right, NULL);
+			return 1;
+		}
+
+		mpz_pow_ui(result, left, mpz_get_ui(right));
+
+		mpz_clears(left, right, NULL);
+		return 0;
+	}
+
+	*failed = node;
+	*message = "unknown operator";
+
+	mpz_clears(left, right, NULL);
+	return 1;
 }
 
 static int resolve_variable(Node *node, mpz_t result, Node **failed, char **message) {
@@ -139,6 +167,7 @@ int run(Node *node, Node **failed, char **message) {
 	mpz_init(value);
 
 	if (resolve(node, value, failed, message)) {
+		mpz_clear(value);
 		return 1;
 	}
 

@@ -39,7 +39,9 @@ static int run_input(Args *args, char *input) {
 
 	if (args->debug) {
 		debug(node);
-	} else if (run(node, &failed_node, &message)) {
+	}
+
+	if (!args->debug && run(node, &failed_node, &message)) {
 		error_runner(failed_node, message);
 
 		if (!args->input) {
