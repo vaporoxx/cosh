@@ -18,6 +18,27 @@ static int resolve_function(Node *node, mpq_t result, Node **failed, char **mess
 		return 0;
 	}
 
+	if (!strcmp(node->value, "ceil")) {
+		mpz_cdiv_q(mpq_numref(result), mpq_numref(value), mpq_denref(value));
+
+		mpq_clear(value);
+		return 0;
+	}
+
+	if (!strcmp(node->value, "den")) {
+		mpq_set_z(result, mpq_denref(value));
+
+		mpq_clear(value);
+		return 0;
+	}
+
+	if (!strcmp(node->value, "floor")) {
+		mpz_fdiv_q(mpq_numref(result), mpq_numref(value), mpq_denref(value));
+
+		mpq_clear(value);
+		return 0;
+	}
+
 	if (!strcmp(node->value, "inv")) {
 		if (!mpq_sgn(value)) {
 			*failed = node;
@@ -40,8 +61,22 @@ static int resolve_function(Node *node, mpq_t result, Node **failed, char **mess
 		return 0;
 	}
 
+	if (!strcmp(node->value, "num")) {
+		mpq_set_z(result, mpq_numref(value));
+
+		mpq_clear(value);
+		return 0;
+	}
+
 	if (!strcmp(node->value, "sgn")) {
 		mpq_set_si(result, mpq_sgn(value), 1);
+
+		mpq_clear(value);
+		return 0;
+	}
+
+	if (!strcmp(node->value, "trunc")) {
+		mpz_tdiv_q(mpq_numref(result), mpq_numref(value), mpq_denref(value));
 
 		mpq_clear(value);
 		return 0;
