@@ -87,7 +87,7 @@ static int resolve_operator(Node *node, mpq_t result, Node **failed, char **mess
 	if (value == '%') {
 		if (mpz_cmp_ui(mpq_denref(left), 1) || mpz_cmp_ui(mpq_denref(right), 1)) {
 			*failed = node;
-			*message = "modulo operands must be integers";
+			*message = "operands must be integers";
 
 			mpq_clears(left, right, NULL);
 			return 1;
@@ -101,7 +101,7 @@ static int resolve_operator(Node *node, mpq_t result, Node **failed, char **mess
 			return 1;
 		}
 
-		mpz_mod(mpq_numref(result), mpq_numref(left), mpq_numref(right));
+		mpz_tdiv_r(mpq_numref(result), mpq_numref(left), mpq_numref(right));
 
 		mpq_clears(left, right, NULL);
 		return 0;
