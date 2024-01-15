@@ -65,7 +65,18 @@ static int run_input(Args *args, char *input) {
 }
 
 int main(int argc, char **argv) {
-	Args args = parse_args(argc, argv);
+	Args args = new_args();
+	char *failed = NULL;
+
+	if (parse_args(argc, argv, &args, &failed)) {
+		if (failed) {
+			fprintf(stderr, "cosh: invalid argument '%s'\n", failed);
+		} else {
+			fprintf(stderr, "cosh: missing argument to '%s'\n", argv[argc - 1]);
+		}
+
+		return EXIT_FAILURE;
+	}
 
 	if (args.help) {
 		puts("cosh: interactive math shell\n");
@@ -74,11 +85,15 @@ int main(int argc, char **argv) {
 		puts("  -h, --help     Prints this help message");
 		puts("  -i, --input    Runs INPUT instead of being interactive");
 
-		return 0;
+		return EXIT_SUCCESS;
 	}
 
 	if (args.input) {
-		return run_input(&args, args.input);
+		if (run_input(&args, args.input)) {
+			return EXIT_FAILURE;
+		}
+
+		return EXIT_SUCCESS;
 	}
 
 	fputs("cosh: interactive math shell\n\n", stderr);
@@ -98,5 +113,5 @@ int main(int argc, char **argv) {
 		free(input);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }

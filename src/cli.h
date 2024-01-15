@@ -19,4 +19,6 @@ void error_runner(Node *node, char *message);
 
 char *get_input(void);
 
-Args parse_args(int argc, char **argv);
+Args new_args(void);
+
+int parse_args(int argc, char **argv, Args *args, char **failed);
