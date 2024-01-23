@@ -4,7 +4,7 @@
 
 enum NodeType {
 	NT_FUNCTION,
-	NT_INTEGER,
+	NT_LITERAL,
 	NT_OPERATOR,
 	NT_VARIABLE,
 };

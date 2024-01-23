@@ -33,7 +33,7 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 				length += 1;
 			}
 
-			add_token(tokens, index, input, length, TT_INTEGER);
+			add_token(tokens, index, input, length, TT_LITERAL);
 
 			index += length;
 			continue;

@@ -33,7 +33,7 @@ int is_expression(Node *node) {
 	switch (node->type) {
 		case NT_FUNCTION:
 			return is_expression(node->left) && !node->right;
-		case NT_INTEGER:
+		case NT_LITERAL:
 			return !node->left && !node->right;
 		case NT_OPERATOR:
 			return is_expression(node->left) && is_expression(node->right);
@@ -55,8 +55,8 @@ char *node_type(NodeType type) {
 	switch (type) {
 		case NT_FUNCTION:
 			return "Function";
-		case NT_INTEGER:
-			return "Integer";
+		case NT_LITERAL:
+			return "Literal";
 		case NT_OPERATOR:
 			return "Operator";
 		case NT_VARIABLE:

@@ -16,8 +16,8 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 			next = new_node(token->index, NT_VARIABLE, token->value);
 		}
 
-		if (token->type == TT_INTEGER) {
-			next = new_node(token->index, NT_INTEGER, token->value);
+		if (token->type == TT_LITERAL) {
+			next = new_node(token->index, NT_LITERAL, token->value);
 		}
 
 		if (token->type == TT_OPERATOR) {
@@ -71,7 +71,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 			}
 
 			if (strchr("+-", value)) {
-				next->left = new_node(token->index, NT_INTEGER, "0");
+				next->left = new_node(token->index, NT_LITERAL, "0");
 
 				root = next;
 				continue;

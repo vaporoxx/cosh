@@ -4,7 +4,7 @@
 
 enum TokenType {
 	TT_IDENTIFIER,
-	TT_INTEGER,
+	TT_LITERAL,
 	TT_OPERATOR,
 	TT_SEPARATOR,
 };

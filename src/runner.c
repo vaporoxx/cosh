@@ -89,10 +89,10 @@ static int resolve_function(Node *node, mpq_t result, Node **failed, char **mess
 	return 1;
 }
 
-static int resolve_integer(Node *node, mpq_t result, Node **failed, char **message) {
+static int resolve_literal(Node *node, mpq_t result, Node **failed, char **message) {
 	if (mpq_set_str(result, node->value, 10)) {
 		*failed = node;
-		*message = "invalid integer";
+		*message = "invalid literal";
 
 		return 1;
 	}
@@ -237,8 +237,8 @@ int resolve(Node *node, mpq_t result, Node **failed, char **message) {
 	switch (node->type) {
 		case NT_FUNCTION:
 			return resolve_function(node, result, failed, message);
-		case NT_INTEGER:
-			return resolve_integer(node, result, failed, message);
+		case NT_LITERAL:
+			return resolve_literal(node, result, failed, message);
 		case NT_OPERATOR:
 			return resolve_operator(node, result, failed, message);
 		case NT_VARIABLE:
