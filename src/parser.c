@@ -8,6 +8,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 	while (*index < tokens->size) {
 		Node *next = NULL;
 		Token *token = tokens->elements + *index;
+		char value = token->value[0];
 
 		*index += 1;
 
@@ -24,7 +25,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 		}
 
 		if (token->type == TT_SEPARATOR) {
-			if (token->value[0] == '(') {
+			if (value == '(') {
 				if (parse_part(tokens, &next, failed, index, ')')) {
 					free_node(root);
 					return 1;
@@ -33,7 +34,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 				next->grouped = 1;
 			}
 
-			if (token->value[0] == ')') {
+			if (value == ')') {
 				if (stop == ')') {
 					stopped = 1;
 					break;
@@ -45,7 +46,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 				return 1;
 			}
 
-			if (token->value[0] == '|') {
+			if (value == '|') {
 				if (stop == '|') {
 					stopped = 1;
 					break;
@@ -58,7 +59,7 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 
 				Node *function = new_node(token->index, NT_FUNCTION, "abs");
 
-				append_node(next, function);
+				function->left = next;
 				next = function;
 			}
 		}
@@ -69,9 +70,8 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 				continue;
 			}
 
-			if (strchr("+-", next->value[0])) {
-				Node *zero = new_node(token->index, NT_INTEGER, "0");
-				append_node(zero, next);
+			if (strchr("+-", value)) {
+				next->left = new_node(token->index, NT_INTEGER, "0");
 
 				root = next;
 				continue;
@@ -84,34 +84,36 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 		}
 
 		if (is_expression(root) && next->type == NT_OPERATOR && !next->right) {
-			Node **child = &root;
+			Node *child = root;
 
-			while (!(*child)->grouped && precedence(*child) < precedence(next)) {
-				child = &(*child)->right;
+			while (!child->grouped && precedence(child) < precedence(next)) {
+				child = child->right;
 			}
 
-			append_node(*child, next);
+			swap_nodes(child, next);
 
-			*child = next;
+			child->left = next;
 			continue;
 		}
 
-		if (root->type == NT_OPERATOR && !last_operator(root)->right && is_expression(next)) {
-			append_node(next, last_operator(root));
-			continue;
-		}
+		if (is_expression(next)) {
+			Node *rightest = root;
 
-		Node *rightest = root;
+			while (rightest->right) {
+				rightest = rightest->right;
+			}
 
-		while (rightest->right) {
-			rightest = rightest->right;
-		}
+			if (rightest->type == NT_OPERATOR) {
+				rightest->right = next;
+				continue;
+			}
 
-		if (rightest->type == NT_VARIABLE && !rightest->grouped) {
-			rightest->type = NT_FUNCTION;
-			append_node(next, rightest);
+			if (rightest->type == NT_VARIABLE && !rightest->grouped) {
+				rightest->left = next;
+				rightest->type = NT_FUNCTION;
 
-			continue;
+				continue;
+			}
 		}
 
 		free_node(next);

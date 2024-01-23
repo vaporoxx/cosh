@@ -3,20 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-int append_node(Node *node, Node *parent) {
-	if (!node || !parent || parent->right) {
-		return 1;
-	}
-
-	if (parent->left) {
-		parent->right = node;
-	} else {
-		parent->left = node;
-	}
-
-	return 0;
-}
-
 void free_node(Node *node) {
 	if (!node) {
 		return;
@@ -44,31 +30,18 @@ int is_expression(Node *node) {
 		return 0;
 	}
 
-	if (node->type == NT_INTEGER || node->type == NT_VARIABLE) {
-		return 1;
-	}
-
-	if (node->type == NT_FUNCTION && is_expression(node->left)) {
-		return 1;
-	}
-
-	if (node->type == NT_OPERATOR && is_expression(node->left) && is_expression(node->right)) {
-		return 1;
+	switch (node->type) {
+		case NT_FUNCTION:
+			return is_expression(node->left) && !node->right;
+		case NT_INTEGER:
+			return !node->left && !node->right;
+		case NT_OPERATOR:
+			return is_expression(node->left) && is_expression(node->right);
+		case NT_VARIABLE:
+			return !node->left && !node->right;
 	}
 
 	return 0;
-}
-
-Node *last_operator(Node *node) {
-	if (!node || node->type != NT_OPERATOR) {
-		return NULL;
-	}
-
-	while (node->right && node->right->type == NT_OPERATOR) {
-		node = node->right;
-	}
-
-	return node;
 }
 
 Node *new_node(size_t index, NodeType type, char *value) {
@@ -113,4 +86,15 @@ int precedence(Node *node) {
 	}
 
 	return 4;
+}
+
+void swap_nodes(Node *first, Node *second) {
+	if (!first || !second) {
+		return;
+	}
+
+	Node temp = *first;
+
+	*first = *second;
+	*second = temp;
 }

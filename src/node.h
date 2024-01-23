@@ -22,18 +22,16 @@ struct Node {
 
 typedef struct Node Node;
 
-int append_node(Node *node, Node *parent);
-
 void free_node(Node *node);
 
 int is_child(Node *node, Node *parent);
 
 int is_expression(Node *node);
 
-Node *last_operator(Node *node);
-
 Node *new_node(size_t index, NodeType type, char *value);
 
 char *node_type(NodeType type);
 
 int precedence(Node *node);
+
+void swap_nodes(Node *first, Node *second);
