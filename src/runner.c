@@ -106,12 +106,44 @@ static int resolve_function(Node *node, mpq_t result, Vars *vars, Node **failed,
 }
 
 static int resolve_literal(Node *node, mpq_t result, Node **failed, char **message) {
-	if (mpq_set_str(result, node->value, 10)) {
+	char *current = strtok(node->value, ",.");
+
+	mpq_t value;
+	mpq_init(value);
+
+	if (mpq_set_str(value, current, 10)) {
+		mpq_clear(value);
+
 		*failed = node;
-		*message = "invalid literal";
+		*message = "invalid integral part";
 
 		return 1;
 	}
+
+	current = strtok(NULL, "");
+
+	if (current) {
+		mpq_t fraction;
+		mpq_init(fraction);
+
+		if (mpq_set_str(fraction, current, 10)) {
+			mpq_clears(fraction, value, NULL);
+
+			*failed = node;
+			*message = "invalid fractional part";
+
+			return 1;
+		}
+
+		mpz_ui_pow_ui(mpq_denref(fraction), 10, strlen(current));
+		mpq_canonicalize(fraction);
+
+		mpq_add(value, fraction, value);
+		mpq_clear(fraction);
+	}
+
+	mpq_set(result, value);
+	mpq_clear(value);
 
 	return 0;
 }

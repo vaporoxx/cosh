@@ -40,6 +40,14 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 				length += 1;
 			}
 
+			if (input[index + length] && strchr(",.", input[index + length])) {
+				length += 1;
+
+				while (isdigit(input[index + length])) {
+					length += 1;
+				}
+			}
+
 			add_token(tokens, index, input, length, TT_LITERAL);
 
 			index += length;
