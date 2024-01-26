@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int run_input(Args *args, char *input) {
+static int run_input(Args *args, char *input, Vars *vars) {
 	Node *node = NULL;
 	Tokens tokens = new_tokens();
 
@@ -41,7 +41,7 @@ static int run_input(Args *args, char *input) {
 		debug(node);
 	}
 
-	if (!args->debug && run(node, &failed_node, &message)) {
+	if (!args->debug && run(node, vars, &failed_node, &message)) {
 		error_runner(failed_node, message);
 
 		if (!args->input) {
@@ -67,6 +67,7 @@ static int run_input(Args *args, char *input) {
 int main(int argc, char **argv) {
 	Args args = new_args();
 	char *failed = NULL;
+	Vars vars = new_vars();
 
 	if (parse_args(argc, argv, &args, &failed)) {
 		if (failed) {
@@ -89,10 +90,11 @@ int main(int argc, char **argv) {
 	}
 
 	if (args.input) {
-		if (run_input(&args, args.input)) {
+		if (run_input(&args, args.input, &vars)) {
 			return EXIT_FAILURE;
 		}
 
+		free_vars(&vars);
 		return EXIT_SUCCESS;
 	}
 
@@ -107,11 +109,12 @@ int main(int argc, char **argv) {
 		if (feof(stdin)) {
 			fputs("^D\n", stderr);
 		} else {
-			run_input(&args, input);
+			run_input(&args, input, &vars);
 		}
 
 		free(input);
 	}
 
+	free_vars(&vars);
 	return EXIT_SUCCESS;
 }

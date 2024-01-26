@@ -31,6 +31,8 @@ int is_expression(Node *node) {
 	}
 
 	switch (node->type) {
+		case NT_ASSIGNMENT:
+			return is_expression(node->left) && node->left->type == NT_VARIABLE && is_expression(node->right);
 		case NT_FUNCTION:
 			return is_expression(node->left) && !node->right;
 		case NT_LITERAL:
@@ -53,6 +55,8 @@ Node *new_node(size_t index, NodeType type, char *value) {
 
 char *node_type(NodeType type) {
 	switch (type) {
+		case NT_ASSIGNMENT:
+			return "Assignment";
 		case NT_FUNCTION:
 			return "Function";
 		case NT_LITERAL:

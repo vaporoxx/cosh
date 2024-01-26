@@ -1,8 +1,8 @@
 #pragma once
 
 #include "node.h"
-#include <gmp.h>
+#include "var.h"
 
-int resolve(Node *node, mpq_t result, Node **failed, char **message);
+int resolve(Node *node, mpq_t result, Vars *vars, Node **failed, char **message);
 
-int run(Node *node, Node **failed, char **message);
+int run(Node *node, Vars *vars, Node **failed, char **message);

@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 enum TokenType {
+	TT_ASSIGNMENT,
 	TT_IDENTIFIER,
 	TT_LITERAL,
 	TT_OPERATOR,

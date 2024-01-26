@@ -2,11 +2,27 @@
 #include <stdio.h>
 #include <string.h>
 
-static int resolve_function(Node *node, mpq_t result, Node **failed, char **message) {
+static int resolve_assignment(Node *node, mpq_t result, Vars *vars, Node **failed, char **message) {
 	mpq_t value;
 	mpq_init(value);
 
-	if (resolve(node->left, value, failed, message)) {
+	if (resolve(node->right, value, vars, failed, message)) {
+		mpq_clear(value);
+		return 1;
+	}
+
+	mpq_set(result, value);
+	set_var(vars, node->left->value, value);
+
+	mpq_clear(value);
+	return 0;
+}
+
+static int resolve_function(Node *node, mpq_t result, Vars *vars, Node **failed, char **message) {
+	mpq_t value;
+	mpq_init(value);
+
+	if (resolve(node->left, value, vars, failed, message)) {
 		mpq_clear(value);
 		return 1;
 	}
@@ -100,11 +116,11 @@ static int resolve_literal(Node *node, mpq_t result, Node **failed, char **messa
 	return 0;
 }
 
-static int resolve_operator(Node *node, mpq_t result, Node **failed, char **message) {
+static int resolve_operator(Node *node, mpq_t result, Vars *vars, Node **failed, char **message) {
 	mpq_t left;
 	mpq_init(left);
 
-	if (resolve(node->left, left, failed, message)) {
+	if (resolve(node->left, left, vars, failed, message)) {
 		mpq_clear(left);
 		return 1;
 	}
@@ -112,7 +128,7 @@ static int resolve_operator(Node *node, mpq_t result, Node **failed, char **mess
 	mpq_t right;
 	mpq_init(right);
 
-	if (resolve(node->right, right, failed, message)) {
+	if (resolve(node->right, right, vars, failed, message)) {
 		mpq_clears(left, right, NULL);
 		return 1;
 	}
@@ -221,9 +237,11 @@ static int resolve_operator(Node *node, mpq_t result, Node **failed, char **mess
 	return 1;
 }
 
-static int resolve_variable(Node *node, mpq_t result, Node **failed, char **message) {
-	if (!strcmp(node->value, "x")) {
-		mpq_set_ui(result, 5, 1);
+static int resolve_variable(Node *node, mpq_t result, Vars *vars, Node **failed, char **message) {
+	Var *var = get_var(vars, node->value);
+
+	if (var) {
+		mpq_set(result, var->value);
 		return 0;
 	}
 
@@ -233,16 +251,18 @@ static int resolve_variable(Node *node, mpq_t result, Node **failed, char **mess
 	return 1;
 }
 
-int resolve(Node *node, mpq_t result, Node **failed, char **message) {
+int resolve(Node *node, mpq_t result, Vars *vars, Node **failed, char **message) {
 	switch (node->type) {
+		case NT_ASSIGNMENT:
+			return resolve_assignment(node, result, vars, failed, message);
 		case NT_FUNCTION:
-			return resolve_function(node, result, failed, message);
+			return resolve_function(node, result, vars, failed, message);
 		case NT_LITERAL:
 			return resolve_literal(node, result, failed, message);
 		case NT_OPERATOR:
-			return resolve_operator(node, result, failed, message);
+			return resolve_operator(node, result, vars, failed, message);
 		case NT_VARIABLE:
-			return resolve_variable(node, result, failed, message);
+			return resolve_variable(node, result, vars, failed, message);
 	}
 
 	*failed = node;
@@ -251,7 +271,7 @@ int resolve(Node *node, mpq_t result, Node **failed, char **message) {
 	return 1;
 }
 
-int run(Node *node, Node **failed, char **message) {
+int run(Node *node, Vars *vars, Node **failed, char **message) {
 	if (!node) {
 		return 0;
 	}
@@ -259,7 +279,7 @@ int run(Node *node, Node **failed, char **message) {
 	mpq_t value;
 	mpq_init(value);
 
-	if (resolve(node, value, failed, message)) {
+	if (resolve(node, value, vars, failed, message)) {
 		mpq_clear(value);
 		return 1;
 	}

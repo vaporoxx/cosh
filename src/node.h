@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 enum NodeType {
+	NT_ASSIGNMENT,
 	NT_FUNCTION,
 	NT_LITERAL,
 	NT_OPERATOR,

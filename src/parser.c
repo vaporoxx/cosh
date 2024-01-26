@@ -12,6 +12,10 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 
 		*index += 1;
 
+		if (token->type == TT_ASSIGNMENT) {
+			next = new_node(token->index, NT_ASSIGNMENT, token->value);
+		}
+
 		if (token->type == TT_IDENTIFIER) {
 			next = new_node(token->index, NT_VARIABLE, token->value);
 		}
@@ -81,6 +85,18 @@ static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index
 
 			*failed = token;
 			return 1;
+		}
+
+		if (root->type == NT_VARIABLE && next->type == NT_ASSIGNMENT && !stop) {
+			next->left = root;
+
+			if (parse_part(tokens, &next->right, failed, index, 0)) {
+				free_node(next);
+				return 1;
+			}
+
+			root = next;
+			continue;
 		}
 
 		if (is_expression(root) && next->type == NT_OPERATOR && !next->right) {

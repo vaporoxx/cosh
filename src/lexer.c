@@ -13,6 +13,13 @@ int lex(char *input, Tokens *tokens, size_t *failed) {
 			continue;
 		}
 
+		if (value == '=') {
+			add_token(tokens, index, input, 1, TT_ASSIGNMENT);
+
+			index += 1;
+			continue;
+		}
+
 		if (isalpha(value)) {
 			size_t length = 1;
 
