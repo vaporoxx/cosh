@@ -319,6 +319,8 @@ int run(Node *node, Vars *vars, Node **failed, char **message) {
 	mpq_out_str(stdout, 10, value);
 	putchar('\n');
 
+	set_var(vars, "Ans", value);
 	mpq_clear(value);
+
 	return 0;
 }
