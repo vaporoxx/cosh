@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <stdio.h>
 
 enum TokenType {
 	TT_ASSIGNMENT,

@@ -1,5 +1,6 @@
 AllowShortFunctionsOnASingleLine: None
 ColumnLimit: 120
+IncludeBlocks: Regroup
 IndentCaseLabels: true
 IndentWidth: 4
 TabWidth: 4

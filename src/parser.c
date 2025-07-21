@@ -1,4 +1,5 @@
 #include "parser.h"
+
 #include <string.h>
 
 static int parse_part(Tokens *tokens, Node **node, Token **failed, size_t *index, char stop) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <stdio.h>
 
 void *xmalloc(size_t size);
 

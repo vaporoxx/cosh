@@ -1,4 +1,5 @@
 #include "debug.h"
+
 #include <stdio.h>
 
 static void debug_node(Node *node, Node *root) {
